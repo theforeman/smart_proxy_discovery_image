@@ -14,7 +14,7 @@ Gem::Specification.new do |gem|
     Smart Proxy plugin providing Foreman Discovery Image API.
   EOS
 
-  gem.files         = Dir['{lib,bundler.d,settings.d}/**/*', 'Gemfile', 'LICENSE']
+  gem.files         = Dir['{lib,bundler.d,settings.d}/**/*', 'Gemfile', 'LICENSE', 'README.md']
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
   gem.license = 'GPLv3'
