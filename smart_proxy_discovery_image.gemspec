@@ -11,7 +11,8 @@ Gem::Specification.new do |gem|
   gem.homepage      = "http://github.com/theforeman/smart_proxy_discovery_image"
   gem.summary       = %q{FDI API for Foreman Smart-Proxy}
   gem.description   = <<-EOS
-    Smart Proxy plugin providing Foreman Discovery Image API.
+    Smart Proxy plugin providing Image API on discovered nodes. This plugin is only
+    useful on discovered nodes, do not install on regular Smart Proxy deployments.
   EOS
 
   gem.files         = Dir['{lib,bundler.d,settings.d}/**/*', 'Gemfile', 'LICENSE', 'README.md']

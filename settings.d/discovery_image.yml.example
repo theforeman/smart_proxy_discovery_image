@@ -1,2 +1,6 @@
 ---
-:enabled: true
+# Smart Proxy plugin providing Image API on discovered nodes. This plugin is only
+# useful on discovered nodes, do not install on regular Smart Proxy deployments.
+# WARNING: If you enable this plugin on standard deployment, your host will be
+# vulnerable to remote reboot and arbitrary code execution!
+:enabled: false
