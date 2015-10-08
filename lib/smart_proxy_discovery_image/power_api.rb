@@ -17,12 +17,14 @@ module Proxy::DiscoveryImage
       log_halt 500, "kexec binary was not found" unless (kexec = which('kexec'))
       data = JSON.parse request.body.read
 
-      # download kernel and image synchronously (can be improved: http://projects.theforeman.org/issues/11318)
-      wget = "#{which("wget")} --timeout=10 --tries=3 --no-check-certificate -qc "
-      status = system("#{wget} '#{escape_for_shell(data['kernel'])}' -O /tmp/vmlinuz")
-      log_halt 500, "Cannot download kernel: #{$?.exitstatus}" unless status
-      status = system("#{wget} '#{escape_for_shell(data['initram'])}' -O /tmp/initrd.img")
-      log_halt 500, "Cannot download kernel: #{$?.exitstatus}" unless status
+      logger.debug "Downloading: #{data['kernel']}"
+      if ::Proxy::HttpDownload.new(data['kernel'], '/tmp/vmlinuz').start.join != 0
+        log_halt 500, "cannot download kernel for kexec!"
+      end
+      logger.debug "Downloading: #{data['initram']}"
+      if ::Proxy::HttpDownload.new(data['initram'], '/tmp/initrd.img').start.join != 0
+        log_halt 500, "cannot download initram for kexec!"
+      end
 
       run_after_response 2, kexec, "--force", "--append=#{data['append']}", "--initrd=/tmp/initrd.img", "/tmp/vmlinuz"
       { :result => true }.to_json
