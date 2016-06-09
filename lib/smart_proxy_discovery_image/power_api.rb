@@ -26,7 +26,7 @@ module Proxy::DiscoveryImage
         log_halt 500, "cannot download initram for kexec!"
       end
 
-      run_after_response 2, kexec, "--force", "--append=#{data['append']}", "--initrd=/tmp/initrd.img", "/tmp/vmlinuz"
+      run_after_response 2, kexec, "--force", "--reset-vga", "--append=#{data['append']}", "--initrd=/tmp/initrd.img", "/tmp/vmlinuz"
       { :result => true }.to_json
     end
 
