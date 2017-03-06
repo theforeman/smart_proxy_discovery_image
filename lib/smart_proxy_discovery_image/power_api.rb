@@ -8,7 +8,7 @@ module Proxy::DiscoveryImage
 
     put "/reboot" do
       log_halt 500, "shutdown binary was not found" unless (shutdown = which('shutdown'))
-      run_after_response 5, shutdown, "-r", "now", "Foreman BMC API reboot"
+      run_after_response 5, shutdown, "-r", "now", "Foreman Power API reboot"
       content_type :json
       { :result => true }.to_json
     end
@@ -25,8 +25,7 @@ module Proxy::DiscoveryImage
       if ::Proxy::HttpDownload.new(data['initram'], '/tmp/initrd.img').start.join != 0
         log_halt 500, "cannot download initram for kexec!"
       end
-
-      run_after_response 2, kexec, "--force", "--reset-vga", "--append=#{data['append']}", "--initrd=/tmp/initrd.img", "/tmp/vmlinuz"
+      run_after_response 2, kexec, "--force", "--reset-vga", "--append=#{data['append']}", "--initrd=/tmp/initrd.img", "/tmp/vmlinuz", *data['extra']
       { :result => true }.to_json
     end
 
@@ -34,11 +33,11 @@ module Proxy::DiscoveryImage
     # Execute command in a separate thread after 5 seconds to give the server some
     # time to finish the request. Does *not* execute via a shell.
     def run_after_response(seconds, *command)
-      logger.debug "BMC shell execution scheduled in #{seconds} seconds"
+      logger.debug "Power API command scheduled in #{seconds} seconds"
       Thread.start do
         begin
           sleep seconds
-          logger.debug "BMC shell executing: #{command.inspect}"
+          logger.debug "Power API executing: #{command.inspect}"
           if (sudo = which('sudo'))
             status = system(sudo, *command)
           else
