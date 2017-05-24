@@ -18,6 +18,6 @@ Gem::Specification.new do |gem|
   gem.files         = Dir['{lib,bundler.d,settings.d}/**/*', 'Gemfile', 'LICENSE', 'README.md']
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.require_paths = ["lib"]
-  gem.license = 'GPLv3'
+  gem.license = 'GPL-3.0'
 end
 
