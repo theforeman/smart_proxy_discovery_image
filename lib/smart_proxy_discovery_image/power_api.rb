@@ -15,6 +15,8 @@ module Proxy::DiscoveryImage
 
     put "/kexec" do
       body_data = request.body.read
+      # change virtual terminal out of newt screen
+      system("chvt, "2")
       logger.debug "Initiated kexec provisioning with #{body_data}"
       log_halt(500, "kexec binary was not found") unless (kexec = which('kexec'))
       begin
@@ -30,7 +32,7 @@ module Proxy::DiscoveryImage
       if ::Proxy::HttpDownload.new(data['initram'], '/tmp/initrd.img').start.join != 0
         log_halt 500, "cannot download initram for kexec!"
       end
-      run_after_response 2, kexec, "--force", "--reset-vga", "--append=#{data['append']}", "--initrd=/tmp/initrd.img", "/tmp/vmlinuz", *data['extra']
+      run_after_response 2, kexec, "--debug", "--force", "--reset-vga", "--append=#{data['append']}", "--initrd=/tmp/initrd.img", "/tmp/vmlinuz", *data['extra']
       { :result => true }.to_json
     end
 
