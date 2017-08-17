@@ -16,7 +16,7 @@ module Proxy::DiscoveryImage
     put "/kexec" do
       body_data = request.body.read
       # change virtual terminal out of newt screen
-      system("chvt, "2")
+      system("chvt", "2")
       logger.debug "Initiated kexec provisioning with #{body_data}"
       log_halt(500, "kexec binary was not found") unless (kexec = which('kexec'))
       begin
