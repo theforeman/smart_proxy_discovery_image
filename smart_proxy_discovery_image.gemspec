@@ -8,7 +8,7 @@ Gem::Specification.new do |gem|
   gem.version       = Proxy::DiscoveryImage::VERSION
   gem.authors       = ['Lukas Zapletal']
   gem.email         = ['lzap+rpm@redhat.com']
-  gem.homepage      = "http://github.com/theforeman/smart_proxy_discovery_image"
+  gem.homepage      = "https://github.com/theforeman/smart_proxy_discovery_image"
   gem.summary       = %q{FDI API for Foreman Smart-Proxy}
   gem.description   = <<-EOS
     Smart Proxy plugin providing Image API on discovered nodes. This plugin is only
