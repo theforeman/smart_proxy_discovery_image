@@ -32,7 +32,7 @@ module Proxy::DiscoveryImage
       if ::Proxy::HttpDownload.new(data['initram'], '/tmp/initrd.img').start.join != 0
         log_halt 500, "cannot download initram for kexec!"
       end
-      run_after_response 2, kexec, "--debug", "--force", "--reset-vga", "--append=#{data['append']}", "--initrd=/tmp/initrd.img", "/tmp/vmlinuz", *data['extra']
+      run_after_response 2, kexec, "--debug", "--force", "--append=#{data['append']}", "--initrd=/tmp/initrd.img", "/tmp/vmlinuz", *data['extra']
       { :result => true }.to_json
     end
 
