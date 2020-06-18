@@ -24,31 +24,36 @@ module Proxy::DiscoveryImage
       rescue JSON::ParserError
         log_halt 500, "Unable to parse kexec JSON input: #{body_data}"
       end
-      logger.debug "Downloading: #{data['kernel']}"
-      if ::Proxy::HttpDownload.new(data['kernel'], '/tmp/vmlinuz').start.join != 0
-        log_halt 500, "cannot download kernel for kexec!"
-      end
-      logger.debug "Downloading: #{data['initram']}"
-      if ::Proxy::HttpDownload.new(data['initram'], '/tmp/initrd.img').start.join != 0
-        log_halt 500, "cannot download initram for kexec!"
-      end
-      run_after_response 2, kexec, "--debug", "--force", "--append=#{data['append']}", "--initrd=/tmp/initrd.img", "/tmp/vmlinuz", *data['extra']
+      run_after_response data, 2, kexec, "--debug", "--force", "--append=#{data['append']}", "--initrd=/tmp/initrd.img", "/tmp/vmlinuz", *data['extra']
       { :result => true }.to_json
     end
 
 
     # Execute command in a separate thread after 5 seconds to give the server some
     # time to finish the request. Does *not* execute via a shell.
-    def run_after_response(seconds, *command)
-      logger.debug "Power API scheduling in #{seconds} seconds: #{command.inspect}"
+    def run_after_response(data, seconds, *command)
       Thread.start do
         begin
-          sleep seconds
-          logger.debug "Power API executing: #{command.inspect}"
-          if (sudo = which('sudo'))
-            status = system(sudo, *command)
-          else
-            logger.warn "sudo binary was not found"
+          # download kernel and initramdisk
+          logger.debug "Downloading: #{data['kernel']}"
+          vmlinuz_thread = ::Proxy::HttpDownload.new(data['kernel'], '/tmp/vmlinuz').start
+          logger.error("vmlinuz is still downloading, ignored") unless vmlinuz_thread
+          logger.error("cannot download vmlinuz for kexec") unless vmlinuz_thread.join == 0
+          logger.debug "Downloading: #{data['initram']}"
+          initrd_thread = ::Proxy::HttpDownload.new(data['initram'], '/tmp/initrd.img').start
+          logger.error("initrd.img is still downloading, ignored") unless initrd_thread
+          logger.error("cannot download initrd.img for kexec") unless initrd_thread.join == 0
+          # wait few seconds just in case the download was fast and perform kexec
+          # only perform kexec when both locks were available to prevent subsequent request while downloading
+          if vmlinuz_thread && initrd_thread
+            logger.debug "Power API scheduling in #{seconds} seconds: #{command.inspect}"
+            sleep seconds
+            logger.debug "Power API executing: #{command.inspect}"
+            if (sudo = which('sudo'))
+              status = system(sudo, *command)
+            else
+              logger.warn "sudo binary was not found"
+            end
           end
           # only report errors
           logger.warn "The attempted command failed with code #{$?.exitstatus}" unless status
