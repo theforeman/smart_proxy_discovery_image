@@ -17,6 +17,8 @@ module Proxy::DiscoveryImage
       body_data = request.body.read
       # change virtual terminal out of newt screen
       system("chvt", "2")
+      is_secureboot = system('mokutil --sb-state|grep enabled')
+      logger.debug "Secure boot is #{is_secureboot}"
       logger.debug "Initiated kexec provisioning with #{body_data}"
       log_halt(500, "kexec binary was not found") unless (kexec = which('kexec'))
       begin
@@ -24,7 +26,13 @@ module Proxy::DiscoveryImage
       rescue JSON::ParserError
         log_halt 500, "Unable to parse kexec JSON input: #{body_data}"
       end
-      download_and_run_after_response data, 2, kexec, "--debug", "--force", "--append=#{data['append']}", "--initrd=/tmp/initrd.img", "/tmp/vmlinuz", *data['extra']
+      args = ["--debug", "--force", "--reset-vga"]
+      args << data['extra'] if data['extra']
+      args << "--kexec-file-syscall" if is_secureboot
+      args << "--append=#{data['append']}"
+      args << "--initrd=/tmp/initrd.img"
+      download_and_run_after_response data, 2, kexec, *args, "/tmp/vmlinuz"
+
       { :result => true }.to_json
     end
 
