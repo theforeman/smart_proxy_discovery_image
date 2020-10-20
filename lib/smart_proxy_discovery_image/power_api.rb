@@ -26,7 +26,7 @@ module Proxy::DiscoveryImage
       rescue JSON::ParserError
         log_halt 500, "Unable to parse kexec JSON input: #{body_data}"
       end
-      args = ["--debug", "--force", "--reset-vga"]
+      args = ["--debug", "--force"]
       args << data['extra'] if data['extra']
       args << "--kexec-file-syscall" if is_secureboot
       args << "--append=#{data['append']}"
