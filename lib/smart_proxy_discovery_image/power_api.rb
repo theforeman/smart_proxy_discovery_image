@@ -27,7 +27,12 @@ module Proxy::DiscoveryImage
         log_halt 500, "Unable to parse kexec JSON input: #{body_data}"
       end
       args = ["--debug", "--force"]
-      args << data['extra'] if data['extra']
+      extra = data['extra']
+      if extra && extra.is_a?(String)
+        args << extra
+      elsif extra && extra.is_a?(Array)
+        args.concat(extra)
+      end
       args << "--kexec-file-syscall" if is_secureboot
       args << "--append=#{data['append']}"
       args << "--initrd=/tmp/initrd.img"
