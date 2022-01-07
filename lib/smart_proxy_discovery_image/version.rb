@@ -1,5 +1,5 @@
 module Proxy
   module DiscoveryImage
-    VERSION = '1.3.2'
+    VERSION = '1.5.0'
   end
 end
