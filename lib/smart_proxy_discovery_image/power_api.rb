@@ -7,8 +7,9 @@ module Proxy::DiscoveryImage
     include Proxy::Util
 
     put "/reboot" do
-      log_halt(500, "shutdown binary was not found") unless (shutdown = which('shutdown'))
-      run_after_response 5, shutdown, "-r", "now", "Foreman Power API reboot"
+      log_halt(500, "reboot binary was not found") unless (reboot = which('reboot'))
+      # --force must be used to avoid transitioning back from systemd to initramdisk
+      run_after_response 2, reboot, "-f"
       content_type :json
       { :result => true }.to_json
     end
