@@ -34,7 +34,6 @@ module Proxy::DiscoveryImage
       elsif extra && extra.is_a?(Array)
         args.concat(extra)
       end
-      args << "--kexec-file-syscall" if is_secureboot
       args << "--append=#{data['append']}"
       args << "--initrd=/tmp/initrd.img"
       download_and_run_after_response data, 2, kexec, *args, "/tmp/vmlinuz"
